@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>20 Unique Words from 500,555 List</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f9f9f9; }
+    input, button { padding: 10px; font-size: 16px; margin-top: 10px; }
+    .words { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px; }
+    .word { background: #fff; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+  <h2>Input → 20 Unique Words (from 500,555 list)</h2>
+  <input type="text" id="inputVal" placeholder="Masukkan input seperti: 12345">
+  <button onclick="generate()">Jana Perkataan</button>
+
+  <div class="words" id="output"></div>
+
+  <script>
+    // Wordlist: word1 hingga word500555
+    const wordlist = Array.from({length: 500555}, (_, i) => `word${i+1}`);
+
+    async function generate() {
+      const input = document.getElementById("inputVal").value.trim();
+      if (!input) return;
+
+      // Hash input dengan SHA-256
+      const encoder = new TextEncoder();
+      const data = encoder.encode(input);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+      const selected = new Set();
+      let pointer = 0;
+
+      // Guna hash untuk pilih 20 indeks unik daripada 500,555
+      while (selected.size < 20 && pointer < hashArray.length - 1) {
+        const index = (hashArray[pointer] << 8 | hashArray[pointer + 1]) % wordlist.length;
+        selected.add(wordlist[index]);
+        pointer++;
+      }
+
+      // Kalau kurang 20 (jarang berlaku), tambah dari senarai awal
+      let i = 0;
+      while (selected.size < 20) {
+        selected.add(wordlist[i]);
+        i++;
+      }
+
+      // Paparkan output
+      const outputDiv = document.getElementById("output");
+      outputDiv.innerHTML = "";
+      Array.from(selected).forEach(word => {
+        const span = document.createElement("div");
+        span.className = "word";
+        span.textContent = word;
+        outputDiv.appendChild(span);
+      });
+    }
+  </script>
+
+</body>
+</html>
